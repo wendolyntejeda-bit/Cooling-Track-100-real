@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoolingTrack Pro - Monitoreo en Vivo</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- QRCode.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Html5-QRCode Scanner -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
+
+  <!-- TOP HEADER (Modern Clean Tech Aesthetic) -->
+  <header class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 border-b border-slate-700 sticky top-0 z-40 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      
+      <!-- Brand & Scale Info -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-sky-500/20">
+          <i data-lucide="flask-conical" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base font-extrabold tracking-tight leading-none">
+              <span class="text-white">CoolingTrack</span>
+              <span class="text-cyan-400 font-black">Pro</span>
+            </h1>
+            <span class="bg-sky-500/20 text-sky-200 text-[10px] font-extrabold font-mono px-2 py-0.5 rounded-full border border-sky-200">
+              18 CDUs / 4 PODs
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-300 font-medium mt-0.5">Monitoreo Químico y Microbiológico de CDUs</p>
+        </div>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="flex items-center gap-2">
+        <button onclick="window.App.exportReport()" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-md">
+          <i data-lucide="download" class="w-4 h-4"></i> Exportar Excel
+        </button>
+        <button onclick="document.getElementById('pods-admin-modal').classList.remove('hidden')"
+                class="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-bold shadow-md transition-all">
+          <i data-lucide="settings" class="w-4 h-4"></i> Administrar PODs
+        </button>
+        <button onclick="document.getElementById('new-batch-modal').classList.remove('hidden')" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-white rounded-xl text-xs font-bold shadow-md transition-all">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i> + Alta de Bidones
+        </button>
+      </div>
+    </div>
+
+    <!-- NAVIGATION TABS -->
+    <div class="bg-slate-800 border-t border-slate-700/80 px-4 sm:px-6">
+      <div class="max-w-7xl mx-auto flex overflow-x-auto space-x-2 py-2 scrollbar-none">
+        <button data-tab-target="scanner" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-sky-700 font-extrabold shadow-sm border border-slate-200/80 transition-all text-xs">
+          <i data-lucide="scan-line" class="w-4 h-4"></i>
+          <span>📱 Muestreo</span>
+        </button>
+        <button data-tab-target="map" class="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/60 font-bold transition-all text-xs">
+          <i data-lucide="layout-grid" class="w-4 h-4"></i>
+          <span>🗺️ Monitoreo</span>
+        </button>
+        <button data-tab-target="weekly-analysis" class="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/60 font-bold transition-all text-xs">
+          <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+          <span>📋 Captura Semanal</span>
+        </button>
+        <button data-tab-target="batches" class="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/60 font-bold transition-all text-xs">
+          <i data-lucide="cylinder" class="w-4 h-4"></i>
+          <span>🛢️ Bidones</span>
+        </button>
+        <button data-tab-target="labels" class="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/60 font-bold transition-all text-xs">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>🏷️ Etiquetas</span>
+        </button>
+      </div>
+    </div>
+  </header>
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1 w-full">
+
+    <!-- KPI STRIP (Refined Cards) -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      
+      <div class="glass-card p-4 rounded-2xl flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
+          <i data-lucide="server" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div id="kpi-cdus-total" class="text-xl font-black text-slate-900 leading-tight">18</div>
+          <div class="text-[11px] text-slate-500 font-semibold">CDUs monitoreados</div>
+        </div>
+      </div>
+
+      <div class="glass-card p-4 rounded-2xl flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+          <i data-lucide="check-circle" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div id="kpi-cdus-optimal" class="text-xl font-black text-emerald-600 leading-tight">--</div>
+          <div class="text-[11px] text-slate-500 font-semibold">Muestreo al Día</div>
+        </div>
+      </div>
+
+      <div class="glass-card p-4 rounded-2xl flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
+          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div id="kpi-cdus-alerts" class="text-xl font-black text-rose-600 leading-tight">--</div>
+          <div class="text-[11px] text-slate-500 font-semibold">Muestreo Pendiente</div>
+        </div>
+      </div>
+
+      <div class="glass-card p-4 rounded-2xl flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold">
+          <i data-lucide="cylinder" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div id="kpi-stock-veolia" class="text-xl font-black text-teal-700 leading-tight">--</div>
+          <div class="text-[11px] text-slate-500 font-semibold">Stock Bidones Veolia</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 1: ESCÁNER POKA-YOKE CON CAPTURA DE PARÁMETROS -->
+    <!-- ========================================================================= -->
+    <section id="tab-scanner" class="tab-content space-y-6">
+      
+      <!-- Banner Guide -->
+      <div class="bg-gradient-to-r from-slate-900 via-sky-950 to-indigo-950 text-white rounded-3xl p-5 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold rounded-full border border-emerald-400/30">
+              VALIDACIÓN DE MUESTREO
+            </span>
+          </div>
+          <h2 class="text-lg font-black tracking-tight">Verificación de Muestreo Poka-Yoke</h2>
+          <p class="text-xs text-slate-300 max-w-xl">
+            Valida la correspondencia entre CDU y contenedor para garantizar la trazabilidad de la muestra antes del análisis de laboratorio.
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btn-toggle-cam" onclick="window.PokaYokeScanner.toggleCamera()" class="px-4 py-2.5 bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-lg shadow-sky-900/40 transition-all">
+            <i data-lucide="video" class="w-4 h-4"></i> Encender Cámara
+          </button>
+          <button onclick="window.PokaYokeScanner.resetScanner()" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">
+            <i data-lucide="rotate-ccw" class="w-4 h-4 inline"></i> Reiniciar
+          </button>
+        </div>
+      </div>
+
+      <!-- Scanner Workspace -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left: Camera Viewport & Quick Simulator -->
+        <div class="lg:col-span-6 space-y-4">
+          <div class="glass-card rounded-3xl p-5 flex flex-col">
+            
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+              <span id="scanner-status-text" class="text-xs font-bold text-slate-700">📷 Listo para escanear CDU, contenedores y etiquetas</span>
+              <div id="scanner-active-cdu-badge" class="hidden px-2.5 py-1 rounded-full bg-sky-100 text-sky-800 text-xs font-bold flex items-center gap-1">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-sky-600"></i>
+                <span id="scanner-cdu-name">CDU-P01-01</span>
+              </div>
+            </div>
+
+            <!-- CAMERA BOX -->
+            <div class="scanner-container bg-slate-950 aspect-video rounded-2xl flex items-center justify-center relative overflow-hidden border-2 border-slate-900">
+              <div id="scanner-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-center text-white z-10 p-4">
+                <div class="text-5xl mb-2">🧪</div>
+                <h3 class="text-base font-extrabold tracking-wide">ESTACIÓN DE ESCANEO</h3>
+                <div class="w-24 h-px bg-cyan-400 my-2"></div>
+                <div class="space-y-1 text-xs text-slate-300">
+                  <div>📷 Escanear CDU</div>
+                  <div>🛢️ Escanear Contenedor</div>
+                  <div>🧴 Escanear Bidón Veolia</div>
+                </div>
+                <div class="w-24 h-px bg-cyan-400 my-2"></div>
+                <p class="text-[11px] text-slate-400">
+                  Presiona "Encender Cámara" para iniciar el escaneo
+                </p>
+              </div>
+              <div id="qr-reader" class="w-full h-full"></div>
+              <div id="scanner-laser" class="scanner-laser hidden"></div>
+            </div>
+
+            <!-- Instant Test Buttons -->
+            <details class="mt-4 p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 text-xs">
+              <summary class="cursor-pointer font-bold text-slate-700 flex items-center justify-between">
+                <span>🛠️ Herramientas de Prueba</span>
+                <span class="text-[10px] text-slate-400">Clic para desplegar</span>
+              </summary>
+
+              <div class="mt-3 space-y-3">
+                <div>
+                  <span class="text-[11px] text-slate-500 font-semibold block mb-1">1. Fijar CDU:</span>
+                  <div class="flex flex-wrap gap-2">
+                    <button onclick="window.PokaYokeScanner.simulate('cdu', 'CDU-P03-02')" class="px-3 py-1.5 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-500 rounded-xl font-bold text-slate-800 shadow-sm transition-all">
+                      📍 CDU-P03-02 (POD-03)
+                    </button>
+                    <button onclick="window.PokaYokeScanner.simulate('cdu', 'CDU-P01-01')" class="px-3 py-1.5 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-500 rounded-xl font-bold text-slate-800 shadow-sm transition-all">
+                      📍 CDU-P01-01 (POD-01)
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <span class="text-[11px] text-slate-500 font-semibold block mb-1">2. Escanear Bote Fijo o Bidón:</span>
+                  <div class="flex flex-wrap gap-2">
+                    <button onclick="window.PokaYokeScanner.simulate('bote', 'CDU-P03-02')" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl font-bold text-emerald-800 shadow-sm transition-all">
+                      ✅ Bote Correcto (P03-02 Match)
+                    </button>
+                    <button onclick="window.PokaYokeScanner.simulate('bote', 'CDU-P01-04')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-300 rounded-xl font-bold text-rose-800 shadow-sm transition-all">
+                      🛑 Bote Equivocado (Poka Error)
+                    </button>
+                    <button onclick="window.PokaYokeScanner.simulate('veolia', '')" class="px-3 py-1.5 bg-sky-50 hover:bg-sky-100 border border-sky-300 rounded-xl font-bold text-sky-800 shadow-sm transition-all">
+                      🛢️ Bidón Veolia Week #35
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </details>
+
+          </div>
+        </div>
+
+        <!-- Right: Poka-Yoke Result & Lab Panel -->
+        <div class="lg:col-span-6 space-y-4">
+          <div id="poka-result-container" class="hidden">
+            <!-- Dynamic Result Card rendered by scanner.js -->
+          </div>
+
+          <!-- Lab Panel -->
+          <div id="lab-panel" class="glass-card rounded-3xl p-5 space-y-4">
+            <h3 class="text-xs font-extrabold uppercase text-slate-500 tracking-wider flex items-center gap-1.5">
+              <i data-lucide="flask-conical" class="w-4 h-4 text-cyan-600"></i>
+              Panel de Laboratorio
+            </h3>
+
+            <div class="grid grid-cols-2 gap-3 text-xs"> 
+
+              <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">
+                  📍 CDU Seleccionado
+                </div>
+                <div id="lab-selected-cdu" class="font-black text-slate-800 text-sm">
+                  Sin CDU seleccionado
+                </div>
+                <div class="text-[11px] text-slate-500 mt-1">
+                  Escanea un CDU para visualizar información.
+                </div>
+              </div>
+
+              <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">
+                  🧪 Últimos Resultados
+                </div>
+                <div class="grid grid-cols-2 gap-1 text-[11px] font-mono">
+                  <div>pH: <b class="text-slate-800">8.4</b></div>
+                  <div>Cond: <b class="text-slate-800">650µS</b></div>
+                  <div>ATP: <b class="text-teal-700">280</b></div>
+                  <div>TDS: <b class="text-slate-800">400</b></div>
+                </div>
+              </div>
+
+              <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">
+                  📅 Próximo Muestreo
+                </div>
+                <div class="text-xs text-slate-700 font-bold">
+                  Programado para esta semana
+                </div>
+              </div>
+
+              <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                <div class="text-[10px] text-slate-400 font-bold uppercase mb-1">
+                  📊 Resumen General
+                </div>
+                <div class="space-y-0.5 text-[11px] font-bold">
+                  <div class="text-emerald-700">🟢 Al día: 9</div>
+                  <div class="text-rose-700">🔴 Pendientes: 9</div>
+                </div>
+              </div>
+
+            </div>
+        </div>
+      </div>
+    </section>
+    <!-- ========================================================================= -->
+    <!-- TAB 2: MAPA DE PLANTA (120 CDUs EN 20 PODs) -->
+    <!-- ========================================================================= -->
+    <section id="tab-map" class="tab-content hidden space-y-6">
+      
+      <!-- Top Filters -->
+      <div class="glass-card rounded-3xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+            <i data-lucide="layout-grid" class="w-5 h-5 text-sky-600"></i> Distribución de 120 CDUs por PODs & Parámetros
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">
+            Supervisa el estado de muestreo semanal y los últimos valores de pH, conductividad y biocida registrados.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 text-xs">
+            <span class="font-bold text-slate-500">Filtrar:</span>
+            <select id="map-pod-filter" onchange="window.App.filterMapByPod(this.value)" class="bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-xs focus:ring-2 focus:ring-sky-500">
+              <option value="all">Ver Todos los 20 PODs</option>
+            </select>
+          </div>
+          <button onclick="window.App.exportReport()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="download" class="w-4 h-4"></i> Descargar Excel
+          </button>
+        </div>
+      </div>
+
+      <!-- PODs Grid Container -->
+      <div id="pods-map-container" class="pod-grid">
+        <!-- Renderizado dinámico desde app.js -->
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 3: CAPTURA SEMANAL DE LABORATORIO POR POD -->
+    <!-- ========================================================================= -->
+    <section id="tab-weekly-analysis" class="tab-content hidden space-y-6">
+
+      <!-- Header Banner -->
+      <div class="glass-card rounded-3xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
+            <i data-lucide="clipboard-list" class="w-5 h-5 text-sky-600"></i> Captura Semanal de Pruebas de Laboratorio
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">
+            Captura rápida por POD para alimentar el histórico sin saturar la pantalla con sobrecarga de datos.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="window.App.exportReport()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="download" class="w-4 h-4"></i> Exportar Histórico Excel
+          </button>
+        </div>
+      </div>
+
+      <!-- POD Selector & Acceptance Limits -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+        <div class="md:col-span-5 glass-card rounded-3xl p-5 flex flex-col justify-between space-y-3">
+          <div>
+            <label class="block font-bold text-slate-700 text-xs mb-1.5">Seleccionar POD a Capturar:</label>
+            <select id="weekly-pod-selector" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 font-bold text-sm text-slate-900 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+              <!-- Opciones dinámicas -->
+            </select>
+          </div>
+
+          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
+            <div class="text-[11px] font-bold text-slate-500 uppercase mb-1">ℹ️ Flujo Limpio de Datos:</div>
+            <p class="text-xs text-slate-600">
+              Al guardar, los datos se almacenan en el histórico y actualizan el semáforo del CDU. Puedes consultar todo el historial cuando descargues el reporte en Excel.
+            </p>
+          </div>
+        </div>
+
+        <div class="md:col-span-7 glass-card rounded-3xl p-5">
+          <div class="font-extrabold text-slate-800 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <i data-lucide="check-square" class="w-4 h-4 text-emerald-600"></i> Límites de Aceptación Química y Microbiológica
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <div class="text-[10px] text-slate-400 font-bold uppercase">ATP (Bacterias)</div>
+              <div class="font-black text-slate-800 mt-0.5">&lt; 1500 RLU</div>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <div class="text-[10px] text-slate-400 font-bold uppercase">pH</div>
+              <div class="font-black text-slate-800 mt-0.5">8.0 - 9.5</div>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <div class="text-[10px] text-slate-400 font-bold uppercase">Conductividad</div>
+              <div class="font-black text-slate-800 mt-0.5">600 - 700 µS/cm</div>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <div class="text-[10px] text-slate-400 font-bold uppercase">TDS</div>
+              <div class="font-black text-slate-800 mt-0.5">&lt; 1000 ppm</div>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <div class="text-[10px] text-slate-400 font-bold uppercase">Turbidez</div>
+              <div class="font-black text-slate-800 mt-0.5">&lt; 10 NTU</div>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <div class="text-[10px] text-slate-400 font-bold uppercase">TSS</div>
+              <div class="font-black text-slate-800 mt-0.5">&lt; 5 ppm</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Analysis Entry Table -->
+      <div class="glass-card rounded-3xl p-5 space-y-4">
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-500 font-bold uppercase">
+                <th class="py-2.5 px-2">CDU</th>
+                <th class="py-2.5 px-1">ATP (RLU)</th>
+                <th class="py-2.5 px-1">TSS (ppm)</th>
+                <th class="py-2.5 px-1">Turbidez (NTU)</th>
+                <th class="py-2.5 px-1">Cond. (µS)</th>
+                <th class="py-2.5 px-1">TDS (ppm)</th>
+                <th class="py-2.5 px-1">pH</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <!-- Renderizado dinámico desde app.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 text-xs mb-1">Observaciones Generales del POD (Opcional):</label>
+          <textarea id="weekly-pod-notes" rows="2" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none" placeholder="ej. Toma de muestras realizada en turno matutino, parámetros normales en todo el POD."></textarea>
+        </div>
+
+        <div class="text-right pt-2">
+          <button onclick="window.App.saveWeeklyPODAnalysis()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-700/20 text-xs transition-all inline-flex items-center gap-2">
+            <i data-lucide="save" class="w-4 h-4"></i> 💾 Guardar Resultados del POD
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 4: LOTES MASIVOS VEOLIA & STOCK -->
+    <!-- ========================================================================= -->
+    <section id="tab-batches" class="tab-content hidden space-y-6">
+      
+      <div class="glass-card rounded-3xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+            <i data-lucide="cylinder" class="w-5 h-5 text-emerald-600"></i> Control de Lotes Masivos Veolia (Semanal)
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">
+            Preparación masiva de ~120-200 bidones/semana y consumo continuo (~13 bidones/día para 16 trays en Purge & Dry).
+          </p>
+        </div>
+        <button onclick="document.getElementById('new-batch-modal').classList.remove('hidden')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-emerald-700/20">
+          <i data-lucide="plus" class="w-4 h-4"></i> + Alta Lote Semanal Veolia
+        </button>
+      </div>
+
+      <!-- Batches Table -->
+      <div class="glass-card rounded-3xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-100/70 text-slate-600 font-extrabold uppercase tracking-wider border-b border-slate-200">
+              <tr>
+                <th class="py-3.5 px-4">Semana / Lote</th>
+                <th class="py-3.5 px-4">Fecha Dosificación</th>
+                <th class="py-3.5 px-4">Stock Disponible</th>
+                <th class="py-3.5 px-4">Responsable QA</th>
+                <th class="py-3.5 px-4">Estado</th>
+                <th class="py-3.5 px-4 text-right">Consumo Rápido en Piso</th>
+              </tr>
+            </thead>
+            <tbody id="batches-list-body" class="divide-y divide-slate-100">
+              <!-- Renderizado dinámico -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 4: IMPRESOR ZEBRA ZQ630 & EXPORTADOR ZPL -->
+    <!-- ========================================================================= -->
+    <section id="tab-labels" class="tab-content hidden space-y-6">
+      
+      <div class="glass-card rounded-3xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+            <i data-lucide="printer" class="w-5 h-5 text-sky-600"></i> Impresor Zebra ZQ630 & Generador ZPL Nativo
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">
+            Imprime directamente en tu Zebra térmica o descarga el código ZPL puro para Zebra Setup Utilities.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <select id="label-type-selector" onchange="window.LabelsManager.renderPrintSheet(this.value)" class="bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold">
+            <option value="veolia-bidon">🏷️ Etiqueta Veolia para Bidones (Zebra)</option>
+            <option value="cdu-labels">📍 Etiquetas para CDUs Físicos</option>
+            <option value="bote-labels">🧪 Etiquetas para Botes Fijos Permanentes</option>
+          </select>
+
+          <select id="label-pod-selector" onchange="window.LabelsManager.renderPrintSheet(document.getElementById('label-type-selector').value)" class="bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold">
+            <option value="all">Todos los PODs</option>
+          </select>
+
+          <button onclick="window.LabelsManager.printLabels()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="printer" class="w-4 h-4"></i> Imprimir en Zebra
+          </button>
+          <button onclick="window.LabelsManager.downloadZPLFile()" class="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-sm" title="Descargar archivo .zpl listo para Zebra ZQ630">
+            <i data-lucide="file-code" class="w-4 h-4"></i> Descargar .ZPL
+          </button>
+          <button onclick="window.LabelsManager.copyZPL()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs flex items-center gap-1.5">
+            <i data-lucide="copy" class="w-4 h-4"></i> Copiar ZPL
+          </button>
+        </div>
+      </div>
+
+      <!-- Thermal Label Preview & ZPL Viewer -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Visual Label Preview -->
+        <div class="lg:col-span-7 flex flex-col items-center justify-center p-6 bg-slate-100/70 rounded-3xl border border-slate-200/80">
+          <span class="text-[11px] font-mono uppercase font-bold text-slate-400 mb-3 tracking-wider">
+            Vista Previa Escala 1:1 Térmica (ZDesigner ZQ630)
+          </span>
+          <div id="print-area">
+            <div id="print-labels-container">
+              <!-- Renderizado dinámico de la etiqueta Zebra -->
+            </div>
+          </div>
+        </div>
+
+        <!-- ZPL Code Output -->
+        <div class="lg:col-span-5 glass-card rounded-3xl p-5 flex flex-col justify-between space-y-3">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                <i data-lucide="code" class="w-4 h-4 text-sky-600"></i> Código ZPL Nativo (203 DPI)
+              </span>
+              <span class="text-[10px] text-slate-400 font-mono font-bold">76mm x 51mm (3" x 2")</span>
+            </div>
+            <textarea id="zpl-code-preview" rows="9" readonly class="w-full bg-slate-900 text-emerald-400 font-mono text-[11px] p-3.5 rounded-2xl border border-slate-800 focus:outline-none select-all" placeholder="^XA..."></textarea>
+          </div>
+          <div class="p-3 bg-amber-50 rounded-2xl border border-amber-200/80 text-[11px] text-amber-900 space-y-1 mt-3">
+            <b>⚠️ Nota para Impresión en Chrome:</b>
+            <p class="text-slate-600">
+              En la ventana de impresión de Chrome, ve a <b>"Más opciones" (More settings)</b> y asegúrate de que la casilla <b>"Encabezados y pies de página" (Headers and footers)</b> esté <u>desmarcada</u> para que no salgan textos pequeños de fecha ni URLs.
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: ALTA DE LOTE SEMANAL VEOLIA -->
+  <!-- ========================================================================= -->
+  <div id="new-batch-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-3xl max-w-md w-full shadow-2xl overflow-hidden">
+      
+      <div class="bg-slate-900 px-6 py-4 text-white flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <i data-lucide="cylinder" class="w-5 h-5 text-emerald-400"></i>
+          <h3 class="text-base font-extrabold">Alta de Lote Masivo Veolia</h3>
+        </div>
+        <button onclick="document.getElementById('new-batch-modal').classList.add('hidden')" class="text-white/70 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="window.App.saveNewBatch(event)" class="p-6 space-y-4 text-xs">
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Semana de Trabajo</label>
+            <input type="text" id="new-batch-week" value="Week #35" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-bold focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Fecha de Dosificación</label>
+            <input type="text" id="new-batch-date" value="26/08/2026" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-bold focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Cantidad de Bidones</label>
+            <input type="number" id="new-batch-qty" value="120" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-bold font-mono focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Responsable Calidad</label>
+            <input type="text" id="new-batch-resp" value="Wendolyn Tejeda" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-semibold focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Notas del Lote</label>
+          <textarea id="new-batch-notes" rows="2" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-sky-500 focus:outline-none" placeholder="ej. Preparación masiva de fluido con biocida para pruebas de racks."></textarea>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="document.getElementById('new-batch-modal').classList.add('hidden')" class="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl">
+            Cancelar
+          </button>
+          <button type="submit" class="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30">
+            Guardar Lote
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast-notification" class="hidden"></div>
+
+  <!-- SCRIPTS -->
+  <script src="labels.js"></script>
+  <script src="scanner.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
