@@ -304,8 +304,8 @@ const LabelsManager = {
         <script>
           new QRCode(document.getElementById('iframe-qr-0'), {
             text: "${qrPayload}",
-            width: 75,
-            height: 75,
+            width: 60,
+            height: 60,
             colorDark: "#000000",
             colorLight: "#ffffff",
             correctLevel: QRCode.CorrectLevel.M
