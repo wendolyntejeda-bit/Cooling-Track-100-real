@@ -148,7 +148,7 @@ const LabelsManager = {
           </div>
 
           <div>
-            <div style="font-size: 10px; font-weight: 800; color: #000; font-family: Arial, sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            <div style="font-size: 9px; font-weight: 800; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
               Responsable: ${activeBatch.responsible}
             </div>
           </div>
