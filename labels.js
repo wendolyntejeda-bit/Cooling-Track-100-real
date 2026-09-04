@@ -457,12 +457,12 @@ const LabelsManager = {
             flex-shrink: 0 !important;
           }
           .qr-wrap {
-            width: 20mm !important;
-            height: 20mm !important;
+            width: 16mm !important; /* antes 20mm */
+            height: 16mm !important;
           }
           .qr-wrap canvas, .qr-wrap img {
-            width: 20mm !important;
-            height: 20mm !important;
+            width: 16mm !important;
+            height: 16mm !important;
             display: block !important;
           }
           .dot-space {
@@ -490,18 +490,17 @@ const LabelsManager = {
             overflow: hidden !important;
           }
           .title-veolia {
-            font-size: 13pt !important; /* antes 15 pt */
+            font-size: 12pt !important; /* antes 15 pt */
             font-weight: 900 !important;
             line-height: 1 !important;
             color: #000000 !important;
-            letter-spacing: -0.2px !important;
           }
           .status-line {
-            font-size: 8pt !important;
+            font-size: 7.5pt !important;
             font-weight: 700 !important;
             white-space: nowrap !important;
+            overflow: hidden !important;
             text-overflow: ellipsis !important;
-            color: #000000 !important;
           }
           .mid-section {
             margin: 1px 0 !important;
@@ -532,7 +531,6 @@ const LabelsManager = {
             white-space: nowrap !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
-            color: #000000 !important;
           }
         </style>
       </head>
