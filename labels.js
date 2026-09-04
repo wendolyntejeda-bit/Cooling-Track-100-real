@@ -490,19 +490,18 @@ const LabelsManager = {
             overflow: hidden !important;
           }
           .title-veolia {
-            font-size: 15pt !important;
+            font-size: 13pt !important; /* antes 15 pt */
             font-weight: 900 !important;
             line-height: 1 !important;
             color: #000000 !important;
-            letter-spacing: -0.3px !important;
+            letter-spacing: -0.2px !important;
           }
           .status-line {
-            font-size: 7.8pt !important;
+            font-size: 8pt !important;
             font-weight: 700 !important;
             white-space: nowrap !important;
-            line-height: 1.2 !important;
+            text-overflow: ellipsis !important;
             color: #000000 !important;
-            margin-top: 1px !important;
           }
           .mid-section {
             margin: 1px 0 !important;
@@ -528,12 +527,12 @@ const LabelsManager = {
             margin-top: 1px !important;
           }
           .resp-line {
-            font-size: 7.8pt !important;
+            font-size: 7pt !important;
             font-weight: 700 !important;
             white-space: nowrap !important;
-            color: #000000 !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
+            color: #000000 !important;
           }
         </style>
       </head>
