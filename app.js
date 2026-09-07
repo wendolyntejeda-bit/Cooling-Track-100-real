@@ -590,7 +590,7 @@ const App = {
       cdu.lastPH = ph;
       cdu.lastSample = todayStr;
       cdu.daysAgo = 0;
-      cdu.sampleStatus = 'taken';
+      cdu.sampleStatus = 'analyzed';
 
       // Evaluación contra límites de aceptación
       if (atp > 1500 || ph < 7.8 || ph > 9.6 || cond > 750 || tds > 1000 || turb > 10 || tss > 5) {
