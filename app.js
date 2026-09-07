@@ -575,12 +575,12 @@ const App = {
     };
 
     cdusInPod.forEach(cdu => {
-      const atp = parseFloat(document.getElementById(`weekly-atp-${cdu.id}`)?.value) || cdu.lastATP || 280;
-      const tss = parseFloat(document.getElementById(`weekly-tss-${cdu.id}`)?.value) || cdu.lastTSS || 1.0;
-      const turb = parseFloat(document.getElementById(`weekly-turb-${cdu.id}`)?.value) || cdu.lastTurbidity || 1.5;
-      const cond = parseFloat(document.getElementById(`weekly-cond-${cdu.id}`)?.value) || cdu.lastConductivity || 650;
-      const tds = parseFloat(document.getElementById(`weekly-tds-${cdu.id}`)?.value) || cdu.lastTDS || 400;
-      const ph = parseFloat(document.getElementById(`weekly-ph-${cdu.id}`)?.value) || cdu.lastPH || 8.4;
+      const atp = parseFloat(document.getElementById(`weekly-atp-${cdu.id}`)?.value) || cdu.lastATP || '';
+      const tss = parseFloat(document.getElementById(`weekly-tss-${cdu.id}`)?.value) || cdu.lastTSS || '';
+      const turb = parseFloat(document.getElementById(`weekly-turb-${cdu.id}`)?.value) || cdu.lastTurbidity || '';
+      const cond = parseFloat(document.getElementById(`weekly-cond-${cdu.id}`)?.value) || cdu.lastConductivity || '';
+      const tds = parseFloat(document.getElementById(`weekly-tds-${cdu.id}`)?.value) || cdu.lastTDS || '';
+      const ph = parseFloat(document.getElementById(`weekly-ph-${cdu.id}`)?.value) || cdu.lastPH || '';
 
       cdu.lastATP = atp;
       cdu.lastTSS = tss;
