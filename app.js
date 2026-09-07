@@ -836,10 +836,14 @@ const App = {
       sel.innerHTML = isFilter ? `<option value="all">Ver Todos los PODs (${pods.length})</option>` : '';
 
       pods.forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p.name;
-        opt.textContent = `${p.name} (${p.count} CDUs)`;
-        sel.appendChild(opt);
+        const pendingCount = this.cdus.filter(  c => c.pod === p.name &&  c.sampleStatus === 'taken').length;
+if (!isFilter && pendingCount === 0) {
+  return;
+}
+
+const opt = document.createElement('option');
+opt.value = p.name; opt.textContent = isFilter
+  ? `${p.name} (${p.count} CDUs)`  : `${p.name} (${pendingCount} pendientes)`;sel.appendChild(opt);
       });
 
       if (currentVal && pods.some(p => p.name === currentVal)) {
