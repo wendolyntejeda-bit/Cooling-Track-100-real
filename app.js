@@ -535,7 +535,7 @@ const App = {
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    const cdusInPod = this.cdus.filter(c => c.pod === podName);
+    const cdusInPod = this.cdus.filter(c => c.pod === podName && c.sampleStatus === 'taken');
 
     if (cdusInPod.length === 0) {
       tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-400">No hay CDUs registrados para ${podName}</td></tr>`;
