@@ -563,7 +563,7 @@ const App = {
     const podName = selector?.value;
     if (!podName) return;
 
-    const cdusInPod = this.cdus.filter(c => c.pod === podName);
+    const cdusInPod = this.cdus.filter(c => c.pod === podName && c.sampleStatus === 'Analyzed'););
     const obs = document.getElementById('weekly-pod-notes')?.value || '';
     const todayStr = new Date().toISOString().split('T')[0];
 
