@@ -124,7 +124,7 @@ const PokaYokeScanner = {
       };
     }
     if (upper.startsWith('BOTE:') || upper.startsWith('BOTE-') || upper.startsWith('BOTE ') || upper.startsWith('MUESTRA-')) {
-      const clean = text.replace(/^(BOTE:|BOTE-|BOTE\s+|MUESTRA-)/i, '').trim();
+      let clean = text.replace(/^(BOTE:|BOTE-|BOTE\s+|MUESTRA-)/i, '').trim(); clean = clean.replace (/^CDU-P(\d+)/i, 'CDU-POD$1' );
       return { type: 'bote', id: clean, raw: text };
     }
     if (upper.startsWith('CDU:') || upper.startsWith('CDU-') || upper.startsWith('CDU ')) {
