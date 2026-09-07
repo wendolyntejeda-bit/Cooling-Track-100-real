@@ -128,7 +128,7 @@ const PokaYokeScanner = {
       return { type: 'bote', id: clean, raw: text };
     }
     if (upper.startsWith('CDU:') || upper.startsWith('CDU-') || upper.startsWith('CDU ')) {
-      const clean = text.replace(/^CDU:\s*/i, '').trim();
+      let clean = text.replace(/^CDU:\s*/i, '').trim(); clean = clean.replace (/^CDU-P(\d+)/i, 'CDU-POD$1' );
       return { type: 'cdu', id: clean, raw: text };
     }
 
